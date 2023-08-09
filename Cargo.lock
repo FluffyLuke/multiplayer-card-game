@@ -5,6 +5,9 @@ version = 3
 [[package]]
 name = "client-side"
 version = "0.1.0"
+dependencies = [
+ "game-logic",
+]
 
 [[package]]
 name = "game-logic"
@@ -17,3 +20,6 @@ version = "0.1.0"
 [[package]]
 name = "server-side"
 version = "0.1.0"
+dependencies = [
+ "game-logic",
+]
