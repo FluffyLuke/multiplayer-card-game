@@ -12,4 +12,6 @@ members = [
     "game-logic",
 ]
 
+[dependencies]
+strum = "0.25"
 
