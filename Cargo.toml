@@ -13,5 +13,5 @@ members = [
 ]
 
 [dependencies]
-strum = "0.25"
+
 
