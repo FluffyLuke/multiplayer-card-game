@@ -1,4 +1,5 @@
 use strum::{EnumIter, IntoEnumIterator};
+use std::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
@@ -37,19 +38,6 @@ pub enum CardType {
 #[derive(Debug, Clone, PartialEq)]
 pub struct CardDeck {
     cards_list: Vec<Card>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Hand {
-    player: Player,
-    player_cards: Vec<Card>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Player {
-    Player(String),
-    Bot(String),
-    None,
 }
 
 impl CardDeck {
@@ -95,6 +83,22 @@ pub trait SeeCardsInDeck {
 
 pub trait SeeCurrentCards {
     fn see_current_cards(&self) -> &Vec<Card>;
+}
+
+pub trait PlayCard {
+    fn play_card(&mut self, card: &Card) -> Result<Card, CannotPlayCardError>;
+}
+
+pub trait AddCard {
+    fn add_card(&mut self, card: Card);
+}
+
+#[derive(Debug, Clone)]
+pub struct CannotPlayCardError;
+impl fmt::Display for CannotPlayCardError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Cannot play this card!")
+    }
 }
 
 #[cfg(test)]
