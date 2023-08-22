@@ -1,57 +1,25 @@
-use tokio::{
-    net::TcpListener, 
-    io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
-    sync::broadcast,
-};
+
 
 use std::{env, fs};
+use error::NoSettingsFileError;
 
 mod server;
+mod error;
 
 #[tokio::main]
 async fn main() {
 
-    let args: String = env::args().collect();
+    let args = env::args();
     let default_settings = fs::read_to_string("./settings.txt")
-        .expect("No \" \"");
+        .map_err(|_| NoSettingsFileError);
 
-    let listener = TcpListener::bind("localhost:1234").await.unwrap();
+    let default_settings = match default_settings{
+        Ok(content) => content,
+        Err(err) => {
+            eprintln!("{err}");
+            return;
+        },
+    };
 
-    let (tx, _rx) = broadcast::channel(10);
-
-    loop {
-        let (mut socket, addr) = listener
-        .accept()
-        .await
-        .unwrap();
-
-        let tx = tx.clone();
-        let mut rx = tx.subscribe();
-
-        tokio::spawn(async move {
-            let (reader, mut writer) = socket.split();
-
-            let mut reader = BufReader::new(reader);
-            let mut line = String::new();
-
-            loop {
-                tokio::select! {
-                    result = reader.read_line(&mut line) => {
-                        if result.unwrap() == 0 {
-                            break;
-                        }
-                        tx.send((line.clone(), addr)).unwrap();
-                        line.clear();
-                    }
-                    result = rx.recv() => {
-                        let (msg, other_addr) = result.unwrap();
-
-                        if addr != other_addr {
-                            writer.write_all(msg.as_bytes()).await.unwrap();
-                        }
-                    }
-                }
-            }
-        });
-    }
+    let server = server::Server::new(args, default_settings);
 }
