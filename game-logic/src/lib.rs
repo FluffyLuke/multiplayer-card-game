@@ -1,2 +1,3 @@
-mod cards;
-mod player;
+pub mod cards;
+pub mod player;
+pub mod game;

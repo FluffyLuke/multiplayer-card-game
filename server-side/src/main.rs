@@ -1,25 +1,23 @@
-
-
-use std::{env, fs};
+use clap::Parser;
 use error::NoSettingsFileError;
+use std::{env, fs};
 
-mod server;
 mod error;
+mod server;
 
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
 
-    let args = env::args();
-    let default_settings = fs::read_to_string("./settings.txt")
-        .map_err(|_| NoSettingsFileError);
+    let server = server::Server::new(args);
 
-    let default_settings = match default_settings{
-        Ok(content) => content,
-        Err(err) => {
-            eprintln!("{err}");
-            return;
-        },
-    };
-
-    let server = server::Server::new(args, default_settings);
+    server.run();
+}
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+pub struct Args {
+    #[arg(short, long, default_value_t = 1234)]
+    port: u16,
+    #[arg(short, long)]
+    server_name: String,
 }

@@ -1,4 +1,4 @@
-use std::{fmt};
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct NoSettingsFileError;
@@ -10,14 +10,15 @@ impl fmt::Display for NoSettingsFileError {
 
 #[derive(Debug, Clone)]
 pub enum ServerSetupError {
-    NoSettingFoundError(&'static str),
-    BadPortNumberError(&'static str),
+    NoSettingFoundError(String),
+    BadPortNumberError(String),
 }
 
 impl fmt::Display for ServerSetupError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if NoSettingFoundError(err) = self {
-            
+        match self {
+            ServerSetupError::NoSettingFoundError(err) => write!(f, "No default setting found for: {err}"),
+            ServerSetupError::BadPortNumberError(err) => write!(f, "Bad port provided: {err}"),
         }
     }
 }

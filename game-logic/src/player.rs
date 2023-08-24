@@ -50,6 +50,10 @@ impl Player {
     pub fn change_cards(&mut self, new_cards: Vec<Card>) {
         self.cards = new_cards;
     }
+
+    pub fn get_name(&self) -> &str{
+        &self.name
+    }
 }
 
 
