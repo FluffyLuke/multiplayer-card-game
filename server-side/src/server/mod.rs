@@ -3,19 +3,25 @@ use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 use game_logic::game::Game;
 use game_logic::game::games::Thousand;
+use game_logic::writer::{Communicator, BackendConnector};
+use tokio::sync::broadcast::{Receiver, Sender};
 
 pub struct Server {
     port: u16,
     server_name: String,
-    game: Box<dyn Game>,
+    game: Option<Box<dyn Game>>,
+    displayer: Box<dyn Communicator>,
 }
 
 impl Server {
     pub fn new(args: Args) -> Server {
+        let (rx, tx) = broadcast::channel::<String>(20);
+        let displayer = Box::new(BackendConnector::new(tx, rx));
         Server {
             port: args.port,
             server_name: args.server_name,
-            game: Box::new(Thousand::new()),
+            game: None,
+            displayer: displayer,
         }
     }
 

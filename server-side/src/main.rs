@@ -11,7 +11,7 @@ async fn main() {
 
     let server = server::Server::new(args);
 
-    server.run();
+    server.run().await;
 }
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
