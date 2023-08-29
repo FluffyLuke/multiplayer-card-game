@@ -1,10 +1,5 @@
 use std::fmt;
 use tokio::sync::broadcast::{Receiver, Sender};
-
-pub trait Displayer<T: Communicator> {
-    fn new(communicator: T);
-    fn display() -> Option<DisplayError>;
-}
 pub struct Writer;
 
 pub struct DisplayError;
@@ -15,26 +10,17 @@ impl fmt::Display for DisplayError {
     }
 }
 
-pub trait Communicator {
-    fn send(&self);
-    fn receive(&self);
-}
-pub struct BackendConnector<T: Clone> {
-    tx: Receiver<T>,
-    rx: Sender<T>,
+pub struct PlayerConnector<T: Clone> {
+    tx: Sender<T>,
+    rx: Receiver<T>,
 }
 
-impl <T: Clone> Communicator for BackendConnector<T> {
-    fn send(&self) {
-        todo!()
+impl <T: Clone> PlayerConnector<T> {
+    pub fn new(tx: Sender<T>, rx: Receiver<T>) -> PlayerConnector<T> {
+        PlayerConnector { rx, tx }
     }
-    fn receive(&self) {
-        todo!()
-    }
-}
 
-impl <T: Clone> BackendConnector<T> {
-    pub fn new(tx: Receiver<T>, rx: Sender<T>) -> BackendConnector<T> {
-        BackendConnector { rx, tx }
+    pub fn clone_tx_rx(&self) -> (Sender<T>, Receiver<T>) {
+        (self.tx.clone(), self.tx.subscribe())
     }
 }

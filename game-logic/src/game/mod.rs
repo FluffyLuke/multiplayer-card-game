@@ -20,18 +20,6 @@ pub trait Game {
     fn list_players(&mut self) -> Option<&Vec<Player>>;
 }
 
-pub struct BasicGame;
-
-impl Game for BasicGame {
-    fn start(&self) -> Result<(), GameError> { Err(GameError::NoGameChoosen) }
-    fn stop(&self){}
-    fn get_max_players(&self) -> u8 {0}
-    fn get_min_players(&self) -> u8 {0}
-    fn get_game_name(&self) -> &str {"PlaceHolderGame"}
-    fn add_player(&mut self, player: Player) -> Option<()> {None}
-    fn remove_player(&mut self, name_of_player: &str) -> Option<()> {None}
-    fn list_players(&mut self) -> Option<&Vec<Player>> {None}
-}
 
 pub trait Rules {
 
