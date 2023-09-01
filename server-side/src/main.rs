@@ -1,9 +1,7 @@
 use clap::Parser;
-use error::NoSettingsFileError;
-use std::{env, fs};
-
 mod error;
 mod server;
+
 
 #[tokio::main]
 async fn main() {
@@ -21,3 +19,4 @@ pub struct Args {
     #[arg(short, long)]
     server_name: String,
 }
+

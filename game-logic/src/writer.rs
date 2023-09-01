@@ -1,6 +1,5 @@
 use std::fmt;
 use tokio::sync::broadcast::{Receiver, Sender};
-pub struct Writer;
 
 pub struct DisplayError;
 

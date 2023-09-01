@@ -17,7 +17,7 @@ pub trait Game {
 
     fn remove_player(&mut self, name_of_player: &str) -> Option<()>;
 
-    fn list_players(&mut self) -> Option<&Vec<Player>>;
+    fn get_players(&mut self) -> Option<&Vec<Player>>;
 }
 
 

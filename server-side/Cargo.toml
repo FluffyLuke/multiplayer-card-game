@@ -10,3 +10,4 @@ authors = ["FluffyLuke"]
 game-logic = { path = "../game-logic" }
 tokio = {version = "1", features = ["full"]}
 clap = { version = "4.3.23", features = ["derive"] }
+regex = "1.9.4"
