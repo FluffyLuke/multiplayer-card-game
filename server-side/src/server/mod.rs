@@ -6,17 +6,17 @@ use game_logic::player::Player;
 use game_logic::game::games::Thousand;
 use game_logic::writer::PlayerConnector;
 use tokio::io::{AsyncWriteExt, BufReader, AsyncBufReadExt};
-use std::sync::{Mutex, Arc};
+use std::{sync::{Mutex, Arc}, ops::Index};
 use crate::{print_to_stdout, display_current_text, set_text_to_display};
 
 pub struct Server {
     port: u16,
     server_name: String,
-    game: Option<Box<dyn Game>>,
+    game: Arc<Mutex<Option<Box<dyn Game>>>>,
     player_connector: PlayerConnector<String>,
     players: Arc<Mutex<Vec<Player>>>,
     stdout_writer: Arc<Mutex<StdOutputWriter>>,
-    games: Vec<Box<dyn Game>>
+    games: Arc<Mutex<Vec<Box<dyn Game + Send>>>>,
 }
 
 impl Server {
@@ -27,11 +27,11 @@ impl Server {
         Server {
             port: args.port,
             server_name: args.server_name,
-            game: None,
+            game: Arc::new(Mutex::new(None)),
             player_connector: displayer,
             players: Arc::new(Mutex::new(vec![])),
             stdout_writer: Arc::new(Mutex::new(StdOutputWriter::new())),
-            games: vec![Box::new(Thousand::new())]
+            games: Arc::new(Mutex::new(vec![Box::new(Thousand::new())]))
         }
     }
 
@@ -46,19 +46,35 @@ impl Server {
 
         //server thread
         let stdout_writer_arc = Arc::clone(&self.stdout_writer);
+        let games_arc = Arc::clone(&self.games);
         tokio::spawn(async move {
-            let mut buffer = String::new();
+            let mut input_buffer = String::new();
             let stdin = std::io::stdin();
+            let games = games_arc.lock().unwrap();
             loop {
-                let games_list = String::new();
-                for game in self.games {
-                    
+                //Choose game from game list
+                let mut games_list = String::new();
+                for game in games.iter() {
+                    games_list.push_str(&format!("{} ", &*game.get_game_name()));
                 }
+                set_text_to_display!(stdout_writer_arc, Some(format!("Choose game to play: {}", games_list)));
+                display_current_text!(stdout_writer_arc);
                 loop {
-                    
-                    set_text_to_display!(stdout_writer_arc, "Choose game to play");
-                    display_current_text!(stdout_writer_arc);
+                    input_buffer.clear();
+                    stdin.read_line(&mut input_buffer).unwrap();
+                    if input_buffer.ends_with("\n") {
+                        input_buffer.pop();
+                    }
+                    if let Some(game) = games.iter()
+                        .find(|&x| {println!("{}", x.get_game_name()); println!("{}", input_buffer); x.get_game_name() == &input_buffer}) {
+                        set_text_to_display!(stdout_writer_arc, None);
+                        print_to_stdout!(stdout_writer_arc, format!("Game selected: {}", game.get_game_name()));
+                        break;
+                    } else {
+                        print_to_stdout!(stdout_writer_arc, "No game found, try again!");
+                    }
                 }
+                set_text_to_display!(stdout_writer_arc, None);
 
                 
             }
@@ -131,8 +147,8 @@ impl StdOutputWriter {
         println!("{}", text);
         self.display_current_text();
     }
-    fn set_text_to_display(&mut self, text: &str) {
-        self.current_text_to_display = Some(text.to_string());
+    fn set_text_to_display(&mut self, text: Option<String>) {
+        self.current_text_to_display = text;
     }
 
     fn display_current_text(&self) -> Option<()> {
@@ -158,6 +174,6 @@ macro_rules! set_text_to_display {
 #[macro_export]
 macro_rules! display_current_text {
     ($writer_arc:expr) => {{
-        $writer_arc.lock().unwrap().display_current_text($text);
+        $writer_arc.lock().unwrap().display_current_text();
     }};
 }
