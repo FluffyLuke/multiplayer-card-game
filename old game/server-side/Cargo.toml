@@ -1,19 +1,13 @@
 [package]
-name = "multiplayer-card-game"
+name = "server-side"
 version = "0.1.0"
 edition = "2021"
+authors = ["FluffyLuke"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-# [workspace]
-# members = [
-#     "client-side",
-#     "server-side",
-#     "game-logic",
-# ]
-
 [dependencies]
+game-logic = { path = "../game-logic" }
 tokio = {version = "1", features = ["full"]}
 clap = { version = "4.3.23", features = ["derive"] }
 regex = "1.9.4"
-
